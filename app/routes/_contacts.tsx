@@ -1,24 +1,24 @@
 import { use, useEffect } from "react";
 import { NavLink, Outlet, useNavigate, useNavigation } from "@reverb/router";
 import { createAction, createLoader, useSubmit } from "@reverb/data";
-import { createContact, getContacts } from "~/lib/contacts.server";
+import { contacts } from "~/lib/contacts.server";
 import clsx from "clsx";
 
-export const loadContacts = createLoader(async ({ request }) => {
+export const getContacts = createLoader(async ({ request }) => {
     "use server";
     const url = new URL(request.url);
     const query = url.searchParams.get("q") ?? undefined;
-    return { contacts: await getContacts(query), q: query };
+    return { allContacts: await contacts.getAll(query), q: query };
 });
 
-const createContactAction = createAction(async () => {
+const createContact = createAction(async () => {
     "use server";
-    const contacts = await createContact();
-    throw Response.redirect(`/contact/${contacts[0].id}`);
+    const contact = await contacts.create();
+    throw Response.redirect(`/contact/${contact.id}`);
 });
 
 export default function Route() {
-    const { contacts, q } = use(loadContacts());
+    const { allContacts, q } = use(getContacts());
 
     const navigation = useNavigation();
     const navigate = useNavigate();
@@ -62,14 +62,14 @@ export default function Route() {
                         <div aria-hidden hidden={!searching} id="search-spinner" />
                         <div aria-live="polite" className="sr-only"></div>
                     </form>
-                    <form action={createContactAction}>
+                    <form action={createContact}>
                         <button type="submit">New</button>
                     </form>
                 </div>
                 <nav>
-                    {!!contacts.length ? (
+                    {!!allContacts.length ? (
                         <ul>
-                            {contacts.map(contact => (
+                            {allContacts.map(contact => (
                                 <li>
                                     <NavLink
                                         className={({ isActive, isPending }) =>

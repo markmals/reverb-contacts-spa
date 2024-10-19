@@ -1,11 +1,11 @@
 import { use, useEffect, useOptimistic } from "react";
 import { useFormStatus } from "react-dom";
 import { createLoader, createAction, defineMeta } from "@reverb/data";
-import { deleteContact, getContact, updateContact } from "~/lib/contacts.server";
+import { contacts } from "~/lib/contacts.server";
 
-export const loadContact = createLoader(async ({ params }) => {
+export const getContact = createLoader(async ({ params }) => {
     "use server";
-    const contact = await getContact(parseInt(params.contactId!));
+    const contact = await contacts.get(parseInt(params.contactId!));
 
     if (!contact) {
         throw new Response("", {
@@ -17,27 +17,27 @@ export const loadContact = createLoader(async ({ params }) => {
     return contact;
 });
 
-export const favoriteAction = createAction(async ({ params, request }) => {
+export const favoriteContact = createAction(async ({ params, request }) => {
     "use server";
     const data = await request.formData();
-    return await updateContact(parseInt(params.contactId!), {
+    return await contacts.update(parseInt(params.contactId!), {
         favorite: data.get("favorite") === "true",
     });
 });
 
-export const deleteAction = createAction(async ({ params }) => {
+export const deleteContact = createAction(async ({ params }) => {
     "use server";
-    await deleteContact(parseInt(params.contactId!));
+    await contacts.del(parseInt(params.contactId!));
     throw Response.redirect("/");
 });
 
 export const meta = defineMeta(async () => {
-    const contact = await loadContact();
+    const contact = await getContact();
     return [{ title: `${contact.first} ${contact.last} | Reverb Contacts` }];
 });
 
 export default function Route() {
-    const contact = use(loadContact());
+    const contact = use(getContact());
     const hasAvatar = !!contact.avatar;
 
     return (
@@ -62,7 +62,7 @@ export default function Route() {
                     ) : (
                         <i>No Name</i>
                     )}
-                    <Favorite id={contact.id} favorite={contact.favorite!} />
+                    <FavoriteButton favorite={contact.favorite!} />
                 </h1>
 
                 {contact.mastodon && (
@@ -87,7 +87,7 @@ export default function Route() {
                         <button type="submit">Edit</button>
                     </form>
                     <form
-                        action={deleteAction}
+                        action={deleteContact}
                         onSubmit={event => {
                             if (!confirm("Please confirm you want to delete this record.")) {
                                 event.preventDefault();
@@ -102,7 +102,7 @@ export default function Route() {
     );
 }
 
-export function Favorite({ id, favorite: initialFavorite }: { id: number; favorite: boolean }) {
+export function FavoriteButton({ favorite: initialFavorite }: { favorite: boolean }) {
     const { data } = useFormStatus();
     const [favorite, setFavorite] = useOptimistic(initialFavorite);
 
@@ -111,7 +111,7 @@ export function Favorite({ id, favorite: initialFavorite }: { id: number; favori
     }, [data]);
 
     return (
-        <form action={favoriteAction}>
+        <form action={favoriteContact}>
             <button
                 aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
                 name="favorite"

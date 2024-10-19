@@ -1,24 +1,24 @@
 import { use } from "react";
 import { createAction } from "@reverb/data";
 import { useNavigate } from "@reverb/router";
-import { loadContact } from "./_contacts.contact.$contactId";
-import { updateContact } from "~/lib/contacts.server";
+import { getContact } from "./_contacts.contact.$contactId";
+import { contacts } from "~/lib/contacts.server";
 
-export const updateAction = createAction(async ({ request }) => {
+export const updateContact = createAction(async ({ request }) => {
     "use server";
     const data = await request.formData();
     const updates = Object.fromEntries(data);
     const id = parseInt(updates.id as string);
-    await updateContact(id, updates);
+    await contacts.update(id, updates);
     return Response.redirect(`/contact/${id}`);
 });
 
 export default function Route() {
-    const contact = use(loadContact());
+    const contact = use(getContact());
     const navigate = useNavigate();
 
     return (
-        <form action={updateAction} id="contact-form">
+        <form action={updateContact} id="contact-form">
             <p>
                 <span>Name</span>
                 <input
