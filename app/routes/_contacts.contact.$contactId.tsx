@@ -25,10 +25,9 @@ export const favoriteAction = createAction(async ({ params, request }) => {
     });
 });
 
-export const deleteAction = createAction(async ({ request }) => {
+export const deleteAction = createAction(async ({ params }) => {
     "use server";
-    const data = await request.formData();
-    await deleteContact(parseInt(data.get("id") as string));
+    await deleteContact(parseInt(params.contactId!));
     throw Response.redirect("/");
 });
 
@@ -95,7 +94,6 @@ export default function Route() {
                             }
                         }}
                     >
-                        <input type="hidden" name="id" value={contact.id} />
                         <button type="submit">Delete</button>
                     </form>
                 </div>
@@ -114,7 +112,6 @@ export function Favorite({ id, favorite: initialFavorite }: { id: number; favori
 
     return (
         <form action={favoriteAction}>
-            <input type="hidden" name="id" value={id} />
             <button
                 aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
                 name="favorite"
