@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        "isolatedModules": true,
+        "esModuleInterop": true,
+        "jsx": "react-jsx",
+        "jsxImportSource": "react",
+        "moduleResolution": "bundler",
+        "resolveJsonModule": true,
+        "target": "ESNext",
+        "strict": true,
+        "allowJs": true,
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": ".",
+        "types": ["react/canary", "@cloudflare/workers-types", "vite/client"],
+        "module": "ESNext",
+        "paths": {
+            "~/*": ["./app/*"]
+        },
+        "rootDirs": ["."]
+    }
+}
