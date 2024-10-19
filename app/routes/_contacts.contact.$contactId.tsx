@@ -62,7 +62,9 @@ export default function Route() {
                     ) : (
                         <i>No Name</i>
                     )}
-                    <FavoriteButton favorite={contact.favorite!} />
+                    <form action={favoriteContact}>
+                        <FavoriteButton favorite={contact.favorite!} />
+                    </form>
                 </h1>
 
                 {contact.mastodon && (
@@ -111,14 +113,12 @@ export function FavoriteButton({ favorite: initialFavorite }: { favorite: boolea
     }, [data]);
 
     return (
-        <form action={favoriteContact}>
-            <button
-                aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
-                name="favorite"
-                value={favorite ? "false" : "true"}
-            >
-                {favorite ? "★" : "☆"}
-            </button>
-        </form>
+        <button
+            aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
+            name="favorite"
+            value={favorite ? "false" : "true"}
+        >
+            {favorite ? "★" : "☆"}
+        </button>
     );
 }
